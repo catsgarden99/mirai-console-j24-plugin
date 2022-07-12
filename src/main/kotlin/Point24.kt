@@ -46,23 +46,40 @@ class Point24 {
     }
 
     var points = genPoints()
+    var moudle = "easy"
 
     fun regenPoints() {
         points = genPoints()
     }
 
-    private fun genPoints() = arrayOf(
-        Random.nextInt(1, 14),
-        Random.nextInt(1, 14),
-        Random.nextInt(1, 14),
-        Random.nextInt(1, 14)
-    )
+    private fun genPoints() =
+        if (moudle == "easy") {
+            arrayOf(
+            Random.nextInt(1, 14),
+            Random.nextInt(1, 14),
+            Random.nextInt(1, 14),
+            Random.nextInt(1, 14)
+            )
+        }
+        else{
+            arrayOf(
+                Random.nextInt(3, 7)*2+1,
+                Random.nextInt(3, 7)*2+1,
+                Random.nextInt(1, 7)*2+1,
+                Random.nextInt(1, 8)*2
+            )
+        }
+
 
     fun evaluate(expression: String): Double {
-        val expr = expression.replace('（', '(').replace('）', ')')
+        val expr = expression.replace('（', '(').replace('）', ')').replace('＝', '=')
 
         if (expr.contains('%'))
             throw IllegalArgumentException("禁止使用%运算符")
+        if (expr.contains("floor"))
+            throw IllegalArgumentException("禁止使用floor")
+        if (expr.contains("signum"))
+            throw IllegalArgumentException("禁止使用signum")
 
         val tokens = ShuntingYard.convertToRPN(
             expr,
@@ -73,6 +90,7 @@ class Point24 {
         )
 
         val nums = points.toMutableList()
+        var functionCount = 0
         for (token in tokens) {
             if (token.type == Token.TOKEN_NUMBER.toInt()) {
                 val value = (token as NumberToken).value
@@ -85,8 +103,12 @@ class Point24 {
                     nums.removeAt(i)
                 else
                     throw IllegalArgumentException("不能使用未得到的数值")
-            } else if (token.type == Token.TOKEN_FUNCTION.toInt()) {
-                throw IllegalArgumentException("禁止使用函数哦")
+            }
+            else if (token.type == Token.TOKEN_FUNCTION.toInt()) {
+//                throw IllegalArgumentException("禁止使用函数哦")
+                ++functionCount
+                if (functionCount >= 3)
+                    throw IllegalArgumentException("禁止使用2个以上函数")
             }
         }
         if (nums.isNotEmpty())

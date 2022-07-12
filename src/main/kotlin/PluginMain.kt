@@ -33,6 +33,13 @@ object PluginMain : KotlinPlugin(
                 games[this.sender.id] = game
                 "请用 [${game.points[0]}] [${game.points[1]}] [${game.points[2]}] [${game.points[3]}] 组成结果为24的算式，以'$prefix'开头验证"
             }
+            // 困难模式
+            startsWith("hard24") and content { PluginConfig.enabledGroups.contains(this.group.id) } quoteReply {
+                val game = Point24()
+                game.moudle = "hard"
+                games[this.sender.id] = game
+                "请用 [${game.points[0]}] [${game.points[1]}] [${game.points[2]}] [${game.points[3]}] 组成结果为24的算式，以'$prefix'开头验证"
+            }
 
             startsWith(prefix) and content { PluginConfig.enabledGroups.contains(this.group.id) } quoteReply {
                 val game = games[sender.id]
@@ -43,13 +50,13 @@ object PluginMain : KotlinPlugin(
                         val result = game.evaluate(message.contentToString().removePrefix(prefix).trim())
                         if (result == 24.0) {
                             games.remove(sender.id)
-                            "厉害，答对了！"
+                            "牛蛙牛蛙，答对了！"
                         } else {
                             "答错了，计算结果为 $result"
                         }
                     } catch (e: Throwable) {
 //                        logger.error(e)
-                        "错误：${e.message}"
+                        "出错喽：${e.message}"
                     }
                 }
             }
